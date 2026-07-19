@@ -175,7 +175,7 @@ Mastering ${topic} requires a balanced synthesis of technical precision and stra
         };
       }
 
-      let content = textData;
+      let content = '';
 
       try {
         const jsonData = JSON.parse(textData);
@@ -183,19 +183,20 @@ Mastering ${topic} requires a balanced synthesis of technical precision and stra
           content = jsonData;
         } else if (Array.isArray(jsonData) && jsonData[0]) {
           const item = jsonData[0];
-          content = typeof item === 'string' ? item : (item.output || item.article || item.content || item.text || JSON.stringify(item, null, 2));
+          content = typeof item === 'string' ? item : (item.output || item.article || item.content || item.text || '');
         } else if (jsonData && typeof jsonData === 'object') {
-          content = jsonData.output || jsonData.article || jsonData.content || jsonData.text || JSON.stringify(jsonData, null, 2);
+          content = jsonData.output || jsonData.article || jsonData.content || jsonData.text || '';
         }
       } catch {
-        // Raw text response
+        content = textData;
       }
 
-      if (!content || !content.trim()) {
+      // If content is missing, empty, or too short (less than 50 characters), trigger the fallback block
+      if (!content || content.trim().length < 50) {
         throw {
           type: 'empty_response',
-          title: 'Empty Content Payload',
-          message: 'The response JSON payload contained no article text.',
+          title: 'Empty Article Output',
+          message: 'The response contained no valid article content.',
         };
       }
 
