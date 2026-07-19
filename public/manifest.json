@@ -1,0 +1,16 @@
+{
+  "name": "ScriptAI — AI Article Generator",
+  "short_name": "ScriptAI",
+  "description": "Generate publication-ready, SEO-optimized articles in seconds with AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030014",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Draft-IQ — Premium AI Article & Content Generator
 
-## Getting Started
+Draft-IQ is an enterprise-grade content generation platform built with Next.js, Framer Motion, and Tailwind CSS. It leverages a server-side proxy to connect securely with a dynamic n8n AI agent workflow, allowing writers to create production-ready, SEO-optimized articles in seconds.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 📊 Data Flow Diagram (DFD)
+
+The diagram below illustrates the path of data from user parameters down through validation, remote webhook processing, content compilation, and export:
+
+```mermaid
+graph TD
+    %% Entities
+    User([User / Writer])
+    BrowserStorage[(Browser LocalStorage)]
+    n8nWebhook[n8n Webhook Endpoint]
+    AIAgent[n8n AI Agent Workflow]
+
+    %% Frontend App Boundary
+    subgraph Frontend [Next.js App Runtime]
+        Form[Article Form Component]
+        Preview[Article Preview Component]
+        RouteHandler[API Proxy Route: /api/generate]
+        StatsTracker[Sidebar Statistics]
+        ExportEngine[PDF & TXT Export Engine]
+    end
+
+    %% Flows
+    User -->|1. Topic, Tone, WordCount| Form
+    Form -->|2. POST Request Payload| RouteHandler
+    
+    %% Proxy and Webhook
+    RouteHandler -->|3. Validates 300-3000 words & Proxies| n8nWebhook
+    n8nWebhook -->|4. Dynamic Prompt Compilation| AIAgent
+    AIAgent -->|5. Compiles Markdown Output| n8nWebhook
+    n8nWebhook -->|6. Webhook Response| RouteHandler
+    RouteHandler -->|7. Sends clean text| Preview
+
+    %% Post-Process & Storage
+    Preview -->|8. Save Draft payload| BrowserStorage
+    BrowserStorage -->|Sync Count| StatsTracker
+    Preview -->|9. Export request| ExportEngine
+    ExportEngine -->|10. Download PDF / TXT| User
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Key Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+*   **Dynamic Word Count Engine**: Request article lengths between `300` and `3000` words. The backend sanitizes inputs and forwards them directly to the AI agent prompts.
+*   **Custom Parsing Engine**: Automatically formats dynamic structures:
+    *   `[Heading]` → styled `<h2>` with modern border indicators.
+    *   `{Subheading}` → styled bold `<h3>` sub-headers.
+    *   `** bullet text` → dot list items (hides raw markdown formatting).
+    *   Strips out `# / ## / ###` characters for human-grade copy visibility.
+*   **Content-First UI**: Newly reordered viewer stacks the completed article at the top, putting analytics, keywords, and quality scorecards cleanly below.
+*   **Local Persistence**: Fully persistent history browser built on top of LocalStorage, featuring stats counters, search options, and draft restoration.
+*   **Production Handcrafted Aesthetics**: Custom glassmorphism cards, glowing radial mesh backdrops, floating keyframes, and full keyboard-navigable accessibility (ARIA).
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+*   **Framework**: Next.js 15 (App Router)
+*   **Type Safety**: TypeScript 5
+*   **Animations**: Framer Motion 12
+*   **Styling**: Tailwind CSS 4 & PostCSS
+*   **Document Generation**: jsPDF
+*   **Integration**: n8n automation webhook (`/webhook/generate-article`)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## ⚙️ Development Setup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+First, install local package dependencies:
+```bash
+npm install
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Start the local development server:
+```bash
+npm run dev
+```
+
+Build the production-ready bundle (cleanly verified, type-checked):
+```bash
+npm run build
+```
